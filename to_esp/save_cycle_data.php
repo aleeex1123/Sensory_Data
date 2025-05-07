@@ -3,7 +3,8 @@ date_default_timezone_set('Asia/Manila');
 
 $servername = "localhost";
 $username = "root";
-$password = ""
+$password = "";
+$dbname = "sensory_data";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
