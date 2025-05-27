@@ -13,7 +13,7 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Production Cycle</title>
+    <title>Weight Data</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
@@ -247,8 +247,8 @@ $result = $conn->query($sql);
         <div class="navbar">
             <img src="/sensory_data/pics/logo 1.png" alt="logo" class="logo">
             <ul>
-                <li><a href="#">Production Cycle</a></li>
-                <li><a href="weight_data.php">Weight Data</a></li>
+                <li><a href="production_cycle.php">Production Cycle</a></li>
+                <li><a href="#">Weight Data</a></li>
                 <li class="dropdown">
                     <a href="realtime_parameters.php">Real-time Parameters</a>
                     <div class="dropdown-content">
@@ -309,137 +309,11 @@ $result = $conn->query($sql);
         </style>
     <!-- Nav Bar -->
 
-    <h1 style="text-align: left; color:rgb(78, 187, 42);">PRODUCTION CYCLE</h1>
-
-    <!-- Production Parameters -->
-        <div class="section">
-            <div class="content-header">
-                <h2>Production Parameters</h2>
-            </div>
-
-            <div class="card-container">
-                <!-- Machine Status -->
-                <div id="status-card" class="card status-card">
-                    <div class="status-container">
-                        <div id="status-indicator" class="status-indicator inactive"></div>
-                        <h2 id="machine-status">Mold Closed</h2>
-                    </div>
-                    <p>Injection Status</p>
-                </div>
-
-                <!-- Temperature 1 -->
-                <div class="card temperature1-card">
-                    <h2 id="temp1-value">25°C</h2>
-                    <p>Temperature 1</p>
-                    <div class="chart-container">
-                        <canvas id="chartTemp1"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Temperature 2 -->
-                <div class="card temperature2-card">
-                    <h2 id="temp2-value">30°C</h2>
-                    <p>Temperature 2</p>
-                    <div class="chart-container">
-                        <canvas id="chartTemp2"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Pressure -->
-                <div class="card pressure-card">
-                    <h2 id="pressure-value">500g</h2>
-                    <p>Pressure</p>
-                    <div class="chart-container">
-                        <canvas id="chartPressure"></canvas>
-                    </div>
-                </div>
-            </div>
-        
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-            <script>
-                let temp1Chart, temp2Chart, pressureChart;
-
-                function updateCharts(temp1, temp2, pressure) {
-                    temp1Chart.data.datasets[0].data = [temp1, 100 - temp1];
-                    temp2Chart.data.datasets[0].data = [temp2, 100 - temp2];
-                    pressureChart.data.datasets[0].data = [pressure, 1000 - pressure];
-
-                    temp1Chart.update();
-                    temp2Chart.update();
-                    pressureChart.update();
-                }
-
-                function fetchData() {
-                    $.ajax({
-                        url: "fetch/fetch_latest_data.php", // Replace with your actual PHP script
-                        method: "GET",
-                        dataType: "json",
-                        success: function (data) {
-                            // Update Values
-                            $("#temp1-value").text(data.tempC_01 + "°C");
-                            $("#temp2-value").text(data.tempC_02 + "°C");
-                            $("#pressure-value").text(data.pressure + "g");
-
-                            // Update Charts
-                            updateCharts(data.tempC_01, data.tempC_02, data.pressure);
-
-                            // Update Injection Status
-                            if (data.cycle_status == 1) {
-                                $("#machine-status").text("Mold Closed");
-                                $("#status-indicator").removeClass("inactive").addClass("active");
-                                $("#status-card").removeClass("inactive-border").addClass("active-border");
-                            } else {
-                                $("#machine-status").text("Mold Open");
-                                $("#status-indicator").removeClass("active").addClass("inactive");
-                                $("#status-card").removeClass("active-border").addClass("inactive-border");
-                            }
-                        }
-                    });
-                }
-
-                document.addEventListener("DOMContentLoaded", function () {
-                    function createChart(ctx, value, maxValue, color) {
-                        return new Chart(ctx, {
-                            type: 'doughnut',
-                            data: {
-                                datasets: [{
-                                    data: [value, maxValue - value],
-                                    backgroundColor: [color, '#222'],
-                                    borderWidth: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '60%',
-                                plugins: {
-                                    tooltip: { enabled: false },
-                                    legend: { display: false },
-                                }
-                            }
-                        });
-                    }
-
-                    // Initialize Charts
-                    temp1Chart = createChart(document.getElementById("chartTemp1"), 25, 100, "#FFB347");
-                    temp2Chart = createChart(document.getElementById("chartTemp2"), 30, 100, "#FF6347");
-                    pressureChart = createChart(document.getElementById("chartPressure"), 500, 1000, "#417630");
-
-                    // Fetch Data Every 8 Seconds
-                    fetchData(); // Initial Fetch
-                    setInterval(fetchData, 1000);
-                });
-            </script>
-        </div>
-    <!-- Production Parameters -->
+    <h1 style="text-align: left; color:rgb(78, 187, 42);">WEIGHT DATA</h1>
 
     <!-- Table -->
         <div class="section">
             <div class="content-header">
-                <h2>Cycle History</h2>
-
                 <div class="table-controls">
                     <div class="table-controls">
                         <div class="by_number">
@@ -511,12 +385,10 @@ $result = $conn->query($sql);
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Cycle Time (seconds)</th>
-                        <th>Recycle Time (seconds)</th>
-                        <th>Pressure (g)</th>
-                        <th>Temperature_01 (°C)</th>
-                        <th>Humidity (%)</th>
-                        <th>Temperature_02 (°C)</th>
+                        <th>Product</th>
+                        <th>Gross Weight (kg)</th>
+                        <th>Net Weight (kg)</th>
+                        <th>Difference (kg)</th>
                         <th>Timestamp</th>
                     </tr>
                 </thead>
@@ -526,17 +398,15 @@ $result = $conn->query($sql);
                     if ($conn->connect_error) {
                         die("Connection failed: " . $conn->connect_error);
                     }
-                    $sql = "SELECT * FROM production_cycle ORDER BY timestamp DESC";
+                    $sql = "SELECT * FROM weight_data ORDER BY timestamp DESC";
                     $result = $conn->query($sql);
                     while ($row = $result->fetch_assoc()) { ?>
                     <tr>
                         <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['cycle_time']; ?></td>
-                        <td><?php echo $row['recycle_time']; ?></td>
-                        <td><?php echo $row['pressure']; ?></td>
-                        <td><?php echo $row['tempC_01']; ?></td>
-                        <td><?php echo $row['humidity']; ?></td>
-                        <td><?php echo $row['tempC_02']; ?></td>
+                        <td><?php echo $row['product']; ?></td>
+                        <td><?php echo $row['gross_weight']; ?></td>
+                        <td><?php echo $row['net_weight']; ?></td>
+                        <td><?php echo $row['difference']; ?></td>
                         <td><?php echo $row['timestamp']; ?></td>
                     </tr>
                     <?php }

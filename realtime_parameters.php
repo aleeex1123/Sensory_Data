@@ -254,6 +254,7 @@ $result = $conn->query($sql);
             <img src="/sensory_data/pics/logo 1.png" alt="logo" class="logo">
             <ul>
                 <li><a href="production_cycle.php">Production Cycle</a></li>
+                <li><a href="weight_data.php">Weight Data</a></li>
                 <li class="dropdown">
                     <a href="#">Real-time Parameters</a>
                     <div class="dropdown-content">
