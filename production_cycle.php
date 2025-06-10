@@ -138,7 +138,7 @@ $result = $conn->query($sql);
             border-left-color: #FF6347; /* Matches the red graph */
         }
         
-        .pressure-card {
+        .product-card {
             border-left: 10px solid;
             border-left-color: #417630; /* Matches the green graph */
         }
@@ -345,13 +345,12 @@ $result = $conn->query($sql);
                     </div>
                 </div>
                 
-                <!-- Pressure -->
-                <div class="card pressure-card">
-                    <h2 id="pressure-value">500g</h2>
-                    <p>Pressure</p>
-                    <div class="chart-container">
-                        <canvas id="chartPressure"></canvas>
+                <!-- Product -->
+                <div id="status-card" class="card product-card">
+                    <div class="status-container">
+                        <h2 id="product-status">Pepsi</h2>
                     </div>
+                    <p>Product</p>
                 </div>
             </div>
         
@@ -364,11 +363,9 @@ $result = $conn->query($sql);
                 function updateCharts(temp1, temp2, pressure) {
                     temp1Chart.data.datasets[0].data = [temp1, 100 - temp1];
                     temp2Chart.data.datasets[0].data = [temp2, 100 - temp2];
-                    pressureChart.data.datasets[0].data = [pressure, 1000 - pressure];
 
                     temp1Chart.update();
                     temp2Chart.update();
-                    pressureChart.update();
                 }
 
                 function fetchData() {
@@ -380,20 +377,21 @@ $result = $conn->query($sql);
                             // Update Values
                             $("#temp1-value").text(data.tempC_01 + "°C");
                             $("#temp2-value").text(data.tempC_02 + "°C");
-                            $("#pressure-value").text(data.pressure + "g");
 
                             // Update Charts
-                            updateCharts(data.tempC_01, data.tempC_02, data.pressure);
+                            updateCharts(data.tempC_01, data.tempC_02);
 
                             // Update Injection Status
                             if (data.cycle_status == 1) {
                                 $("#machine-status").text("Mold Closed");
                                 $("#status-indicator").removeClass("inactive").addClass("active");
                                 $("#status-card").removeClass("inactive-border").addClass("active-border");
+                                $("#product-status").text(data.product);
                             } else {
                                 $("#machine-status").text("Mold Open");
                                 $("#status-indicator").removeClass("active").addClass("inactive");
                                 $("#status-card").removeClass("active-border").addClass("inactive-border");
+                                $("#product-status").text(data.product);
                             }
                         }
                     });
@@ -425,7 +423,6 @@ $result = $conn->query($sql);
                     // Initialize Charts
                     temp1Chart = createChart(document.getElementById("chartTemp1"), 25, 100, "#FFB347");
                     temp2Chart = createChart(document.getElementById("chartTemp2"), 30, 100, "#FF6347");
-                    pressureChart = createChart(document.getElementById("chartPressure"), 500, 1000, "#417630");
 
                     // Fetch Data Every 8 Seconds
                     fetchData(); // Initial Fetch
@@ -513,10 +510,10 @@ $result = $conn->query($sql);
                         <th>ID</th>
                         <th>Cycle Time (seconds)</th>
                         <th>Recycle Time (seconds)</th>
-                        <th>Pressure (g)</th>
                         <th>Temperature_01 (°C)</th>
-                        <th>Humidity (%)</th>
                         <th>Temperature_02 (°C)</th>
+                        <th>Machine</th>
+                        <th>Product</th>
                         <th>Timestamp</th>
                     </tr>
                 </thead>
@@ -528,17 +525,28 @@ $result = $conn->query($sql);
                     }
                     $sql = "SELECT * FROM production_cycle ORDER BY timestamp DESC";
                     $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) { ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['cycle_time']; ?></td>
-                        <td><?php echo $row['recycle_time']; ?></td>
-                        <td><?php echo $row['pressure']; ?></td>
-                        <td><?php echo $row['tempC_01']; ?></td>
-                        <td><?php echo $row['humidity']; ?></td>
-                        <td><?php echo $row['tempC_02']; ?></td>
-                        <td><?php echo $row['timestamp']; ?></td>
-                    </tr>
+
+                    // Flag to track if we're at the first (latest) entry
+                    $isFirstRow = true;
+
+                    while ($row = $result->fetch_assoc()) {
+                        // Skip the first (latest) row if both cycle_time and recycle_time are 0
+                        if ($isFirstRow && $row['cycle_time'] == 0 && $row['recycle_time'] == 0) {
+                            $isFirstRow = false;
+                            continue;
+                        }
+                        $isFirstRow = false;
+                        ?>
+                        <tr>
+                            <td><?php echo $row['id']; ?></td>
+                            <td><?php echo $row['cycle_time']; ?></td>
+                            <td><?php echo $row['recycle_time']; ?></td>
+                            <td><?php echo $row['tempC_01']; ?></td>
+                            <td><?php echo $row['tempC_02']; ?></td>
+                            <td><?php echo $row['machine']; ?></td>
+                            <td><?php echo $row['product']; ?></td>
+                            <td><?php echo $row['timestamp']; ?></td>
+                        </tr>
                     <?php }
                     $conn->close(); ?>
                 </tbody>
